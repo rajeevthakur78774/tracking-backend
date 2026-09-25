@@ -6,13 +6,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. MongoDB se Connect Karein (YAHAN APNA MONGODB KA LINK DAALEIN)
+// 1. MongoDB se Connect Karein
 const mongoURI = "mongodb+srv://rajeevthakur78774_db_user:vpr7rd7OB8tgoUMv@cluster0.n2tqu4l.mongodb.net/?appName=Cluster0";
 mongoose.connect(mongoURI)
     .then(() => console.log("🔥 MongoDB securely connect ho gaya hai!"))
     .catch(err => console.log("MongoDB Connection Error: ", err));
 
-// 2. Database ka Structure (Schema)
+// 2. Database ka Naya Structure (Schema) - Nayi details ke sath
 const orderSchema = new mongoose.Schema({
     orderId: String,
     status: String,
@@ -20,13 +20,22 @@ const orderSchema = new mongoose.Schema({
     date: String,
     origin: { type: String, default: "Delhi-NCR" },
     destination: String,
-    tableStatus: String
+    tableStatus: String,
+    weight: String,         // Naya field
+    package: String,        // Naya field
+    invoiceNo: String,      // Naya field
+    expectedDate: String,   // Naya field
+    contactDetail: String   // Naya field
 });
 const Order = mongoose.model('Order', orderSchema);
 
 // 3. API - Admin Update Order
 app.post('/update-order', async (req, res) => {
-    const { orderId, status, location, date, origin, destination, tableStatus } = req.body; 
+    // Nayi details ko request se nikalna
+    const { 
+        orderId, status, location, date, origin, destination, tableStatus,
+        weight, package, invoiceNo, expectedDate, contactDetail 
+    } = req.body; 
 
     try {
         await Order.findOneAndUpdate(
@@ -37,7 +46,12 @@ app.post('/update-order', async (req, res) => {
                 date: date,
                 origin: origin || "Delhi-NCR",
                 destination: destination || "-",
-                tableStatus: tableStatus || status
+                tableStatus: tableStatus || status,
+                weight: weight || "-",
+                package: package || "-",
+                invoiceNo: invoiceNo || "-",
+                expectedDate: expectedDate || "-",
+                contactDetail: contactDetail || "-"
             },
             { returnDocument: 'after', upsert: true } 
         );
@@ -64,7 +78,8 @@ app.get('/track-order/:id', async (req, res) => {
     }
 });
 
-// 5. Server Start Karein
-app.listen(3000, () => {
-    console.log("Server is running on http://localhost:3000");
+// 5. Server Start Karein (Render ke liye PORT best practice)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
